@@ -6,19 +6,21 @@ Created on Thu Mar  4 09:30:02 2021
 """
 
 def writeFlightStreamScript(wing,scene,scriptFile):
-    scriptTemplate = open("C:/Users/bmoor/Desktop/FlightStream/Code/scriptTemplate.txt","r")
+    scriptTemplate = open("C:/Users/Bruno-USU/Desktop/Research/FlightStream_Code/scriptTemplate.txt","r")
     scriptFlightStream = open(scriptFile,"w")
     
     for line in scriptTemplate:
         if "simulationTemplate" in line:
             scriptFlightStream.write(scene.simulationTemplate+"\n")
         elif "SET_TRAILING_EDGE_SWEEP_ANGLE angleTE" in line:
-            if max(wing.Sweep[0]) < 45:
+            if max(wing.Sweep[0]) < 41:
                 scriptFlightStream.write("SET_TRAILING_EDGE_SWEEP_ANGLE "+str(45.0)+"\n")
             else:
                 scriptFlightStream.write("SET_TRAILING_EDGE_SWEEP_ANGLE "+str(max(wing.Sweep[0])*1.1)+"\n")
         elif "FILE wingCSVFile" in line:
             scriptFlightStream.write("FILE "+wing.CSVFile+"\n")
+        elif "wingTEFile" in line:
+            scriptFlightStream.write(wing.TEFile+"\n")
         elif "TREFFTZ trefftzDistance" in line:
             scriptFlightStream.write("TREFFTZ "+str(wing.Trefftz)+"\n")
         elif "ANGLE_OF_ATTACK alpha" in line:

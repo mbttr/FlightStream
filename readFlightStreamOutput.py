@@ -13,4 +13,7 @@ def readFlightStreamOutput(outputFile):
     CL = float(data[4])
     CDi = float(data[5])
     Cm = float(data[8])
-    return CL, CDi, Cm
+    
+    data = output[25].split(":")
+    numIter = float(data[1])
+    return CL, CDi, Cm, numIter

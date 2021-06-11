@@ -11,7 +11,7 @@ def calculateParameters(CL,CDi,Cm,wing,scene):
     CLa = 2*CL/np.deg2rad(2*scene.alpha)
     Cma = 2*Cm/np.deg2rad(2*scene.alpha)
     
-    xAC = -Cma/CLa + 0.25
+    xAC_c = -Cma/CLa + 0.25/wing.MAC
     kappaD = CDi*np.pi*wing.RA/(CL**2)-1
     
-    return kappaD, xAC
+    return kappaD, xAC_c
