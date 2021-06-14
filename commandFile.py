@@ -25,7 +25,7 @@ class iterCounter:
 
 def aeroEfficiency(x, cons):
     # print(x)
-    wing = wingClass.wing(12, 0.25, Lambda, naca, writeGeom, folder, n_span, n_airfoil, N, curvetype, x)
+    wing = wingClass.wing(8, 1.0, Lambda, naca, writeGeom, folder, n_span, n_airfoil, N, curvetype, x)
     wing.CSVFile = folder+wing.filename+"_iter"+str(iterCount.count)+".csv"
     writeCSV.writeCSV(wing)
     outputFile = folder+"outputFile_"+wing.filename+"_iter"+str(iterCount.count)+".txt"
@@ -39,7 +39,7 @@ def aeroEfficiency(x, cons):
         p = subprocess.run("FlightStream.exe -hidden -script "+scriptFile)
         os.chdir('C:/Users/Bruno-USU/Desktop/Research/FlightStream_Code')
     if readOutput == 'y':
-        CL, CDi, Cm = readFlightStreamOutput.readFlightStreamOutput(outputFile)
+        CL, CDi, Cm, numIter = readFlightStreamOutput.readFlightStreamOutput(outputFile)
     if calcParameters == 'y':
         kappaD, xAC = calculateParameters.calculateParameters(CL,CDi,Cm,wing,scene)
     
@@ -55,17 +55,17 @@ tstart = time.time()
 now = datetime.datetime.now()
 
 RA = np.linspace(8,20,1)
-RT = np.linspace(0.25,1,1)
-Lambda = np.linspace(40,40,1)
+RT = np.linspace(1,1,1)
+Lambda = np.linspace(0,40,1)
 naca = '0012'
-alpha = -5
+alpha = 5
 V_inf = 10
 
-n_span = 80
-n_airfoil = 80
+n_span = 60
+n_airfoil = 60
 
-N_sections = np.array([32])
-curvetype = 'linear'
+N_sections = np.array([5])
+curvetype = 'optimize'
 
 writeGeom = 'y'
 writeScripts = 'y'
@@ -101,7 +101,7 @@ if curvetype != "optimize":
             kappaD0, xAC0 = calculateParameters.calculateParameters(CL0,CDi0,Cm0,wing0,scene0)
 
 
-        x = np.array([-3.94710088,  0.81221836,  4.6402091,  -4.89999999])
+        x = np.array([ 0.07272349, -1.77535848, -0.57360626,  1.93501528, -1.97432559,       -0.16660714])
         print(RA[0], RT[0])
         wing = wingClass.wing(RA[0], RT[0], Lambda[0], naca, writeGeom, folder, n_span, n_airfoil, N_sections[0], curvetype, x)
         writeCSV.writeCSV(wing)
@@ -427,12 +427,17 @@ else:
             self.kAC = self.xAC-self.xAC0
     
         def constraintFun1(self,x):
-            return -cons.kAC + 0.3 
+            # print("constraint 1",-self.kAC + 0.3)
+            return -self.kAC + 0.3 
+            # b=0.3
+            # a=0.27
+            # return abs((b-a)/2) - abs(self.kAC - (a+b)/2)
     
         def constraintFun2(self,x):
-            return cons.kAC - 0.27 
+            # print("constraint 2",self.kAC - 0.27)
+            return self.kAC - 0.27 
     
-    wing0 = wingClass.wing(12, 0.25, 0, naca, writeGeom, folder, n_span, n_airfoil, N, 'linear', 0)
+    wing0 = wingClass.wing(8, 1.0, 0, naca, writeGeom, folder, n_span, n_airfoil, N, 'linear', 0)
     writeCSV.writeCSV(wing0)
     outputFile0 = folder+"outputFile_"+wing0.filename+".txt"
     savedRunFile0 = folder+"savedRunFile_"+wing0.filename+".fsm"
@@ -445,7 +450,7 @@ else:
         p = subprocess.run("FlightStream.exe -hidden -script "+scriptFile0)
         os.chdir('C:/Users/Bruno-USU/Desktop/Research/FlightStream_Code')
     if readOutput == 'y':
-        CL0, CDi0, Cm0 = readFlightStreamOutput.readFlightStreamOutput(outputFile0)
+        CL0, CDi0, Cm0, numIter = readFlightStreamOutput.readFlightStreamOutput(outputFile0)
     if calcParameters == 'y':
         kappaD0, xAC0 = calculateParameters.calculateParameters(CL0,CDi0,Cm0,wing0,scene0)
     
@@ -455,21 +460,22 @@ else:
     x0 = np.zeros(N-1)
     
     const = ({'type': 'ineq',
-              'fun': cons.constraintFun2
+              'fun': cons.constraintFun1
               },{'type': 'ineq',
               'fun': cons.constraintFun2
              })
-    bnds = ((-5,5),(-5,5),(-5,5),(-5,5))
+                 
+    bnds = ((-2,2),(-2,2),(-2,2),(-2,2))
     
     iterCount = iterCounter()
         
     # x = optimize.minimize(aeroEfficiency, x0, args=(cons), constraints = const, bounds=bnds,
-    #                                               tol=1e-4,
+    #                                               tol=1e-3,
     #                                               method='SLSQP').x
 
     # BASINHOPPING
-    minimizer_kwargs={"method":"SLSQP","constraints":const,"bounds":bnds,"args":(cons),"tol":1e-3}
-    x = optimize.basinhopping(aeroEfficiency, x0, minimizer_kwargs=minimizer_kwargs, niter=2, disp = True).x
+    minimizer_kwargs={"method":"SLSQP","constraints":const,"bounds":bnds,"args":(cons),"tol":1e-2}
+    x = optimize.basinhopping(aeroEfficiency, x0, minimizer_kwargs=minimizer_kwargs, niter=10, disp = True).x
     
 tend = time.time() - tstart
 print(tend)

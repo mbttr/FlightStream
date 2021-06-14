@@ -21,6 +21,7 @@ def writeCSV(wing):
             writer.writerow(['Component','Wing'])
             writer.writerow(['LiftingSurface','true'])
             writer.writerow(['Mesh',wing.n_airfoil,wing.n_span,wing.growthtype,wing.growthrate,wing.periodicity,'false'])
+            writer.writerow(['Parameter','Mark_trailing_edges'])
             for i in range(wing.N_sections):
                 writer.writerow(['CrossSection']+np.ndarray.tolist(wing.coords[:,i]))
                 
