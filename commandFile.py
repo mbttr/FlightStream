@@ -25,7 +25,7 @@ class iterCounter:
 
 def aeroEfficiency(x, cons):
     # print(x)
-    wing = wingClass.wing(8, 1.0, Lambda, naca, writeGeom, folder, n_span, n_airfoil, N, curvetype, x)
+    wing = wingClass.wing(RA[0], RT[0], Lambda, naca, writeGeom, folder, n_span, n_airfoil, N, curvetype, x)
     wing.CSVFile = folder+wing.filename+"_iter"+str(iterCount.count)+".csv"
     writeCSV.writeCSV(wing)
     outputFile = folder+"outputFile_"+wing.filename+"_iter"+str(iterCount.count)+".txt"
@@ -55,14 +55,14 @@ tstart = time.time()
 now = datetime.datetime.now()
 
 RA = np.linspace(8,20,1)
-RT = np.linspace(1,1,1)
+RT = np.linspace(0.25,1,1)
 Lambda = np.linspace(0,40,1)
 naca = '0012'
 alpha = 5
 V_inf = 10
 
-n_span = 60
-n_airfoil = 60
+n_span = 20
+n_airfoil = 40
 
 N_sections = np.array([5])
 curvetype = 'optimize'
@@ -428,16 +428,16 @@ else:
     
         def constraintFun1(self,x):
             # print("constraint 1",-self.kAC + 0.3)
-            return -self.kAC + 0.3 
+            return -self.kAC + 0.165 
             # b=0.3
             # a=0.27
             # return abs((b-a)/2) - abs(self.kAC - (a+b)/2)
     
         def constraintFun2(self,x):
             # print("constraint 2",self.kAC - 0.27)
-            return self.kAC - 0.27 
+            return self.kAC - 0.155 
     
-    wing0 = wingClass.wing(8, 1.0, 0, naca, writeGeom, folder, n_span, n_airfoil, N, 'linear', 0)
+    wing0 = wingClass.wing(RA[0], RT[0], 0, naca, writeGeom, folder, n_span, n_airfoil, N, 'linear', 0)
     writeCSV.writeCSV(wing0)
     outputFile0 = folder+"outputFile_"+wing0.filename+".txt"
     savedRunFile0 = folder+"savedRunFile_"+wing0.filename+".fsm"
@@ -474,8 +474,23 @@ else:
     #                                               method='SLSQP').x
 
     # BASINHOPPING
-    minimizer_kwargs={"method":"SLSQP","constraints":const,"bounds":bnds,"args":(cons),"tol":1e-2}
-    x = optimize.basinhopping(aeroEfficiency, x0, minimizer_kwargs=minimizer_kwargs, niter=10, disp = True).x
+    minimizer_kwargs={"method":"SLSQP","constraints":const,"bounds":bnds,"args":(cons),"tol":1e-3}
+    x_from0 = optimize.basinhopping(aeroEfficiency, x0, minimizer_kwargs=minimizer_kwargs, niter=10, disp = True).x 
+    
+    print("xfrom0",x_from0)
+    
+    iterCount = iterCounter()
+    
+    x0 = np.tan(np.deg2rad(10))*np.linspace(0,wing0.b_semi,N)
+    x0 = x0[1:]
+    x_from10 = optimize.basinhopping(aeroEfficiency, x0, minimizer_kwargs=minimizer_kwargs, niter=10, disp = True).x
+
+    print("xfrom10",x_from10)
+
+    # x0 = np.tan(np.deg2rad(20))*np.linspace(0,wing0.b_semi,N)
+    # x0 = x0[1:]
+    # x_from20 = optimize.basinhopping(aeroEfficiency, x0, minimizer_kwargs=minimizer_kwargs, niter=10, disp = True).x
+ 
     
 tend = time.time() - tstart
 print(tend)
