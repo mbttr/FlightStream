@@ -56,22 +56,22 @@ class wing:
             self.x = self.x_airfoil + self.x_quarterChord
             self.z = z_root[:,None]*self.RTarray
             
-            fig1 = plt.figure(figsize=(4.25,4.25))
-            plt.subplot(111)
-            plt.plot(self.y[:,0],-self.x[:,0],'k')
-            plt.plot(self.y[:,-1],-self.x[:,-1],'k')
-            plt.plot(self.y[0],-self.x[0],'k')
-            plt.plot(self.y[0],-self.x[100],'k')
-            plt.plot(-self.y[:,0],-self.x[:,0],'k')
-            plt.plot(-self.y[:,-1],-self.x[:,-1],'k')
-            plt.plot(-self.y[0],-self.x[0],'k')
-            plt.plot(-self.y[0],-self.x[100],'k')
-            plt.xlabel('y')
-            plt.ylabel('x')
-            plt.axis('equal')
-            # plt.axis('off')
-            plt.show()
-            fig1.savefig('wingplot.pdf',bbox_inches='tight')
+            # fig1 = plt.figure(figsize=(4.25,4.25))
+            # plt.subplot(111)
+            # plt.plot(self.y[:,0],-self.x[:,0],'k')
+            # plt.plot(self.y[:,-1],-self.x[:,-1],'k')
+            # plt.plot(self.y[0],-self.x[0],'k')
+            # plt.plot(self.y[0],-self.x[100],'k')
+            # plt.plot(-self.y[:,0],-self.x[:,0],'k')
+            # plt.plot(-self.y[:,-1],-self.x[:,-1],'k')
+            # plt.plot(-self.y[0],-self.x[0],'k')
+            # plt.plot(-self.y[0],-self.x[100],'k')
+            # plt.xlabel('y')
+            # plt.ylabel('x')
+            # plt.axis('equal')
+            # # plt.axis('off')
+            # plt.show()
+            # fig1.savefig('wingplot.pdf',bbox_inches='tight')
         
         if curvetype == "linear":     
             self.RTarray = np.linspace(1,self.RT,self.N_sections)
@@ -88,6 +88,53 @@ class wing:
             self.x = self.x_airfoil + self.x_quarterChord
             self.z = z_root[:,None]*self.RTarray
             
+            # fig1 = plt.figure(figsize=(4.25,4.25))
+            # plt.subplot(111)
+            # plt.plot(self.y[:,0],-self.x[:,0],'k')
+            # plt.plot(self.y[:,-1],-self.x[:,-1],'k')
+            # plt.plot(self.y[0],-self.x[0],'k')
+            # plt.plot(self.y[0],-self.x[100],'k')
+            # # plt.plot(-self.y[:,0],-self.x[:,0],'k')
+            # # plt.plot(-self.y[:,-1],-self.x[:,-1],'k')
+            # # plt.plot(-self.y[0],-self.x[0],'k')
+            # # plt.plot(-self.y[0],-self.x[100],'k')
+            # plt.xlabel('y')
+            # plt.ylabel('x')
+            # plt.axis('equal')
+            # # plt.axis('off')
+            # plt.show()
+            # # fig1.savefig('wingplot.pdf',bbox_inches='tight')
+
+            # fig1 = plt.figure(figsize=(4.25,4.25))
+            # plt.subplot(111)
+            # plt.plot(self.y[0]/np.max(self.y[0]),self.Lambdaarray,'k')
+            # plt.xlabel('y / (b/2)')
+            # plt.ylabel('$\Lambda$')
+            # plt.xlim([0,1])
+            # plt.ylim([0,20])
+            # # plt.axis('equal')
+            # # plt.axis('off')
+            # plt.show()
+            # fig1.savefig('lambdaplot.pdf',bbox_inches='tight')
+
+
+        if curvetype == "quad":   
+            self.RTarray = np.linspace(1,self.RT,self.N_sections)
+            
+            self.x_airfoil = np.zeros((len(x_root),self.N_sections))
+            self.y = np.zeros((len(x_root),self.N_sections))
+            self.z = np.zeros((len(x_root),self.N_sections))
+            
+            self.y[:,:] = np.linspace(0,self.b_semi,self.N_sections)
+            self.x_airfoil = x_root[:,None]*self.RTarray
+            self.x_quarterChord = np.zeros(self.N_sections)
+            
+            
+            self.x_quarterChord = 0*self.y**3 + 0.18*self.y**2 +0*self.y
+            self.x = self.x_airfoil + self.x_quarterChord
+            self.z = z_root[:,None]*self.RTarray
+
+
             fig1 = plt.figure(figsize=(4.25,4.25))
             plt.subplot(111)
             plt.plot(self.y[:,0],-self.x[:,0],'k')
@@ -105,17 +152,42 @@ class wing:
             plt.show()
             # fig1.savefig('wingplot.pdf',bbox_inches='tight')
 
-            # fig1 = plt.figure(figsize=(4.25,4.25))
-            # plt.subplot(111)
-            # plt.plot(self.y[0]/np.max(self.y[0]),self.Lambdaarray,'k')
-            # plt.xlabel('y / (b/2)')
-            # plt.ylabel('$\Lambda$')
-            # plt.xlim([0,1])
-            # plt.ylim([0,20])
-            # # plt.axis('equal')
-            # # plt.axis('off')
-            # plt.show()
-            # fig1.savefig('lambdaplot.pdf',bbox_inches='tight')
+
+
+        if curvetype == "optimizequad":   
+            self.RTarray = np.linspace(1,self.RT,self.N_sections)
+            
+            self.x_airfoil = np.zeros((len(x_root),self.N_sections))
+            self.y = np.zeros((len(x_root),self.N_sections))
+            self.z = np.zeros((len(x_root),self.N_sections))
+            
+            self.y[:,:] = np.linspace(0,self.b_semi,self.N_sections)
+            self.x_airfoil = x_root[:,None]*self.RTarray
+            self.x_quarterChord = np.zeros(self.N_sections)
+            
+            
+            self.x_quarterChord = xOptim[0]*self.y**3 + xOptim[1]*self.y**2 + xOptim[2]*self.y
+            self.x = self.x_airfoil + self.x_quarterChord
+            self.z = z_root[:,None]*self.RTarray
+
+
+            fig1 = plt.figure(figsize=(4.25,4.25))
+            plt.subplot(111)
+            plt.plot(self.y[:,0],-self.x[:,0],'k')
+            plt.plot(self.y[:,-1],-self.x[:,-1],'k')
+            plt.plot(self.y[0],-self.x[0],'k')
+            plt.plot(self.y[0],-self.x[100],'k')
+            # plt.plot(-self.y[:,0],-self.x[:,0],'k')
+            # plt.plot(-self.y[:,-1],-self.x[:,-1],'k')
+            # plt.plot(-self.y[0],-self.x[0],'k')
+            # plt.plot(-self.y[0],-self.x[100],'k')
+            plt.xlabel('y')
+            plt.ylabel('x')
+            plt.axis('equal')
+            # plt.axis('off')
+            plt.show()
+            # fig1.savefig('wingplot.pdf',bbox_inches='tight')
+
 
         if curvetype == "optimize":   
             self.RTarray = np.linspace(1,self.RT,self.N_sections)
@@ -138,22 +210,22 @@ class wing:
             # plt.axis('equal')
             # plt.show()
 
-            fig1 = plt.figure(figsize=(4.25,4.25))
-            plt.subplot(111)
-            plt.plot(self.y[:,0],-self.x[:,0],'k')
-            plt.plot(self.y[:,-1],-self.x[:,-1],'k')
-            plt.plot(self.y[0],-self.x[0],'k')
-            plt.plot(self.y[0],-self.x[100],'k')
-            # plt.plot(-self.y[:,0],-self.x[:,0],'k')
-            # plt.plot(-self.y[:,-1],-self.x[:,-1],'k')
-            # plt.plot(-self.y[0],-self.x[0],'k')
-            # plt.plot(-self.y[0],-self.x[100],'k')
-            plt.xlabel('y')
-            plt.ylabel('x')
-            plt.axis('equal')
-            # plt.axis('off')
-            plt.show()
-            # fig1.savefig('wingplot.pdf',bbox_inches='tight')
+            # fig1 = plt.figure(figsize=(4.25,4.25))
+            # plt.subplot(111)
+            # plt.plot(self.y[:,0],-self.x[:,0],'k')
+            # plt.plot(self.y[:,-1],-self.x[:,-1],'k')
+            # plt.plot(self.y[0],-self.x[0],'k')
+            # plt.plot(self.y[0],-self.x[100],'k')
+            # # plt.plot(-self.y[:,0],-self.x[:,0],'k')
+            # # plt.plot(-self.y[:,-1],-self.x[:,-1],'k')
+            # # plt.plot(-self.y[0],-self.x[0],'k')
+            # # plt.plot(-self.y[0],-self.x[100],'k')
+            # plt.xlabel('y')
+            # plt.ylabel('x')
+            # plt.axis('equal')
+            # # plt.axis('off')
+            # plt.show()
+            # # fig1.savefig('wingplot.pdf',bbox_inches='tight')
 
  
         if curvetype == "defined":   
