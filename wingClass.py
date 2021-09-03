@@ -26,6 +26,12 @@ class wing:
         self.N_sections = N_sections
         self.curvetype = curvetype
         
+        if self.curvetype == 'elliptic':
+            self.b = np.pi*self.RA/4
+            self.S_ref = self.b**2/self.RA
+            self.MAC = self.S_ref/self.b
+            self.b_semi = self.b/2
+        
         self.n_span = n_span
         self.n_airfoil = n_airfoil
         
@@ -94,10 +100,56 @@ class wing:
             plt.plot(self.y[:,-1],-self.x[:,-1],'k')
             plt.plot(self.y[0],-self.x[0],'k')
             plt.plot(self.y[0],-self.x[100],'k')
-            # plt.plot(-self.y[:,0],-self.x[:,0],'k')
-            # plt.plot(-self.y[:,-1],-self.x[:,-1],'k')
-            # plt.plot(-self.y[0],-self.x[0],'k')
-            # plt.plot(-self.y[0],-self.x[100],'k')
+            plt.plot(-self.y[:,0],-self.x[:,0],'k')
+            plt.plot(-self.y[:,-1],-self.x[:,-1],'k')
+            plt.plot(-self.y[0],-self.x[0],'k')
+            plt.plot(-self.y[0],-self.x[100],'k')
+            plt.xlabel('y')
+            plt.ylabel('x')
+            plt.axis('equal')
+            # plt.axis('off')
+            plt.show()
+            # fig1.savefig('wingplot.pdf',bbox_inches='tight')
+
+            # fig1 = plt.figure(figsize=(4.25,4.25))
+            # plt.subplot(111)
+            # plt.plot(self.y[0]/np.max(self.y[0]),self.Lambdaarray,'k')
+            # plt.xlabel('y / (b/2)')
+            # plt.ylabel('$\Lambda$')
+            # plt.xlim([0,1])
+            # plt.ylim([0,20])
+            # # plt.axis('equal')
+            # # plt.axis('off')
+            # plt.show()
+            # fig1.savefig('lambdaplot.pdf',bbox_inches='tight')
+
+
+        if curvetype == "elliptic":    
+            self.N_sections = 200
+            self.y = np.zeros((len(x_root),self.N_sections)) 
+            self.y[:,:] = np.linspace(0,self.b_semi,self.N_sections)
+            
+            self.c = 4*self.b/(np.pi*self.RA)*np.sqrt(1-(2*self.y/self.b)**2)
+            self.RTarray = self.c
+            
+            self.x_airfoil = np.zeros((len(x_root),self.N_sections))
+            self.x_quarterChord = np.zeros(self.N_sections)
+            self.z = np.zeros((len(x_root),self.N_sections))
+            
+            self.x_airfoil = x_root[:,None]*self.RTarray
+            self.x = self.x_airfoil + self.x_quarterChord
+            self.z = z_root[:,None]*self.RTarray
+            
+            fig1 = plt.figure(figsize=(4.25,4.25))
+            plt.subplot(111)
+            plt.plot(self.y[:,0],-self.x[:,0],'k')
+            plt.plot(self.y[:,-1],-self.x[:,-1],'k')
+            plt.plot(self.y[0],-self.x[0],'k')
+            plt.plot(self.y[0],-self.x[100],'k')
+            plt.plot(-self.y[:,0],-self.x[:,0],'k')
+            plt.plot(-self.y[:,-1],-self.x[:,-1],'k')
+            plt.plot(-self.y[0],-self.x[0],'k')
+            plt.plot(-self.y[0],-self.x[100],'k')
             plt.xlabel('y')
             plt.ylabel('x')
             plt.axis('equal')
@@ -229,18 +281,21 @@ class wing:
 
  
         if curvetype == "defined":   
-            self.RTarray = np.linspace(1,self.RT,self.N_sections)
+            self.RTarray = np.linspace(1,self.RT,self.N_sections) #np.array([1,	0.835,	0.665,	0.585,	0.61,	0.58,	0.52,	0.53,	0.47,	0.395,	0.22,	0.02])#
             
             self.x_airfoil = np.zeros((len(x_root),self.N_sections))
             self.y = np.zeros((len(x_root),self.N_sections))
             self.z = np.zeros((len(x_root),self.N_sections))
             
-            self.y[:,:] = np.linspace(0,self.b_semi,self.N_sections)
+            self.y[:,:] = np.linspace(0,self.b_semi,self.N_sections)#np.array([0,	0.3,	0.5,	0.8,	1.55,	1.8,	1.92,	2.2,	2.6,	2.75,	3.2,	3.4])
             self.x_airfoil = x_root[:,None]*self.RTarray
             self.x_quarterChord = np.zeros(self.N_sections)
             self.x_quarterChord[1:] = xOptim
             self.x = self.x_airfoil + self.x_quarterChord
             self.z = z_root[:,None]*self.RTarray
+            
+            # self.MAC = 0.544
+            # self.S_ref = 3.7
 
             fig1 = plt.figure(figsize=(4.25,4.25))
             plt.subplot(111)
@@ -248,10 +303,12 @@ class wing:
             plt.plot(self.y[:,-1],-self.x[:,-1],'k')
             plt.plot(self.y[0],-self.x[0],'k')
             plt.plot(self.y[0],-self.x[100],'k')
-            # plt.plot(-self.y[:,0],-self.x[:,0],'k')
-            # plt.plot(-self.y[:,-1],-self.x[:,-1],'k')
-            # plt.plot(-self.y[0],-self.x[0],'k')
-            # plt.plot(-self.y[0],-self.x[100],'k')
+            plt.plot(self.y[0],-(self.x[100]+(self.x[0]-self.x[100])/4),'k--',linewidth=0.3)
+            plt.plot(-self.y[:,0],-self.x[:,0],'k')
+            plt.plot(-self.y[:,-1],-self.x[:,-1],'k')
+            plt.plot(-self.y[0],-self.x[0],'k')
+            plt.plot(-self.y[0],-self.x[100],'k')
+            plt.plot(-self.y[0],-(self.x[100]+(self.x[0]-self.x[100])/4),'k--',linewidth=0.3)
             plt.xlabel('y')
             plt.ylabel('x')
             plt.axis('equal')
